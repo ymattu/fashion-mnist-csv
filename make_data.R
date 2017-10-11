@@ -1,6 +1,6 @@
 library(tidyverse)
 
-setwd("~/Desktop/fashion-mnist/")
+setwd("~/Desktop/fashion-mnist-csv/")
 
 load_image_file <- function(filename) {
   ret = list()
@@ -27,34 +27,15 @@ train <- load_image_file('~/Downloads/fashion-mnist/data/fashion/train-images-id
 train$y <- load_label_file('~/Downloads/fashion-mnist/data/fashion/train-labels-idx1-ubyte')
 
 fashion_train <- as_data_frame(train$x) %>%
-  mutate(y = train$y)
+  mutate(y = train$y) %>%
+  sample_n(1000)
 
 test <- load_image_file('~/Downloads/fashion-mnist/data/fashion/t10k-images-idx3-ubyte')
 test$y <- load_label_file('~/Downloads/fashion-mnist/data/fashion/t10k-labels-idx1-ubyte')  
 
 fashion_test <- as_data_frame(test$x) %>%
-  mutate(y = test$y)
+  mutate(y = test$y) %>%
+  sample_n(1000)
 
 write_csv(fashion_train, "fashion_train.csv")
 write_csv(fashion_test, "fashion_test.csv")
-
-
-
-res0 <- MlBayesOpt::xgb_opt(train_data = fashion_train,
-                            train_label = fashion_train$y,
-                            test_data = fashion_test,
-                            test_label = fashion_test$y,
-                            objectfun = "multi:softmax",
-                            evalmetric = "merror",
-                            classes = 10,
-                            init_points = 3,
-                            n_iter = 1)
-
-res <- MlBayesOpt::xgb_cv_opt(data = fashion_train,
-                              label = fashion_train$y,
-                              objectfun = "multi:softmax",
-                              evalmetric = "merror",
-                              n_folds = 20,
-                              classes = 10,
-                              acq = "ucb")
-
